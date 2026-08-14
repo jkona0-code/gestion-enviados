@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestión de Locales – Curicó</title>
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --surface2: #f0ede6;
+    --border: #d8d4cb;
+    --accent: #2a6496;
+    --accent2: #1a4a70;
+    --danger: #c0392b;
+    --text: #1c1c1c;
+    --muted: #6b6b6b;
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; }
+  header { background: var(--accent2); color: #fff; padding: 12px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  header h1 { font-size: 17px; font-weight: 600; }
+  .btn-success { background: #27ae60; color: #fff; border-color: #27ae60; }
+  .btn-success:hover { background: #1e8449; }
+  .btn-warn { background: #d68910; color: #fff; border-color: #d68910; }
+  .btn-warn:hover { background: #b7770d; }
+  .obligatorio-tag { display:inline-flex;align-items:center;gap:4px;background:#fce4ec;border:1px solid #f48fb1;border-radius:4px;padding:3px 8px;margin:3px;font-size:12px; }
+  .obligatorio-tag button { background:none;border:none;cursor:pointer;color:#880e4f;font-size:15px;line-height:1;padding:0 2px; }
+  .obligatorios-wrap { display:flex;flex-wrap:wrap;min-height:28px;margin-top:6px; }
+  .sent-chip.obligatorio { border-color:#f48fb1;background:#fce4ec; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .spin { display:inline-block;animation:spin 0.7s linear infinite; }
+  .print-overlay { display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center; }
+  .print-overlay.open { display:flex; }
+  .print-box { background:#fff;border-radius:10px;padding:28px;max-width:680px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.25); }
+  .tabs { display: flex; background: var(--accent); }
+  .tab-btn { padding: 10px 22px; color: rgba(255,255,255,0.75); border: none; background: none; cursor: pointer; font-size: 13px; font-weight: 500; border-bottom: 3px solid transparent; transition: all 0.15s; }
+  .tab-btn.active { color: #fff; border-bottom-color: #fff; background: rgba(255,255,255,0.1); }
+  .tab-btn:hover:not(.active) { background: rgba(255,255,255,0.08); color: #fff; }
+  .tab-panel { display: none; padding: 20px 24px; }
+  .tab-panel.active { display: block; }
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: 20px; overflow: hidden; }
+  .section-header { padding: 12px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .section-header h2 { font-size: 14px; font-weight: 600; }
+  .section-body { padding: 14px 16px; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .badge-a { background: #e8f5e9; color: #1b5e20; }
+  .badge-b { background: #f3e5f5; color: #4a148c; }
+  .badge-guia { background: #e3f2fd; color: #0d47a1; }
+  .badge-subguia { background: #fff3e0; color: #e65100; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 8px 10px; background: var(--surface2); color: var(--muted); font-weight: 600; font-size: 12px; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 10px; border-bottom: 1px solid #ebe8e2; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafaf7; }
+  .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; font-size: 12px; font-weight: 500; transition: all 0.12s; white-space: nowrap; }
+  .btn:hover { background: var(--surface2); }
+  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-primary:hover { background: var(--accent2); border-color: var(--accent2); }
+  .btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+  .btn-sm { padding: 3px 8px; font-size: 11px; }
+  input, select { font-family: inherit; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 10px; color: var(--text); background: var(--surface); width: 100%; }
+  input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(42,100,150,0.12); }
+  label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 4px; }
+  .form-row { margin-bottom: 10px; }
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 10px; padding: 24px; min-width: 380px; max-width: 540px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
+  .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .locales-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .local-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .local-card-head { padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .local-card-head .lname { font-weight: 600; font-size: 13px; }
+  .local-card-body { padding: 10px 14px; }
+  .person-row { display: flex; align-items: center; gap: 6px; padding: 5px 0; border-bottom: 1px solid #f0ede6; font-size: 12px; }
+  .person-row:last-of-type { border-bottom: none; }
+  .person-role { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; min-width: 54px; }
+  .person-name { flex: 1; }
+  .stats-row { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; flex: 1; min-width: 110px; }
+  .stat-card .val { font-size: 22px; font-weight: 600; color: var(--accent); }
+  .stat-card .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .alert { padding: 10px 14px; border-radius: var(--radius); font-size: 13px; margin-bottom: 12px; }
+  .alert-info { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
+  .alert-warn { background: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
+  .weeks-list { display: flex; flex-direction: column; gap: 12px; }
+  .week-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .week-card-head { padding: 10px 16px; background: var(--surface2); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .sent-chip { display: inline-flex; align-items: center; gap: 4px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 3px 8px; margin: 3px; font-size: 12px; }
+  .excluido-tag { display: inline-flex; align-items: center; gap: 4px; background: #ffebee; border: 1px solid #ef9a9a; border-radius: 4px; padding: 3px 8px; margin: 3px; font-size: 12px; }
+  .excluido-tag button { background: none; border: none; cursor: pointer; color: #c62828; font-size: 15px; line-height: 1; padding: 0 2px; }
+  .excluidos-wrap { display: flex; flex-wrap: wrap; min-height: 30px; margin-top: 6px; }
+  .badge-oblig { background: #fce4ec; color: #880e4f; }
+  @media print { header,.tabs,.btn,#enviados-stats,#pool-info,.week-card-head .btn-danger { display:none!important; } body{background:#fff;} }
+
+  .progress-wrap { background: #e0e0e0; border-radius: 4px; height: 6px; margin-bottom: 4px; }
+  .progress-bar { height: 6px; border-radius: 4px; background: var(--accent); transition: width 0.3s; }
+  .table-scroll { width: 100%; overflow-x: auto; }
+
+  /* ===================== RESPONSIVO ===================== */
+  @media (max-width: 640px) {
+    body { font-size: 13px; }
+    header { padding: 10px 14px; }
+    header h1 { font-size: 15px; }
+    .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tab-btn { padding: 10px 14px; font-size: 12px; white-space: nowrap; }
+    .tab-panel { padding: 14px 12px; }
+    .section-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .section-header > div { flex-wrap: wrap; }
+    .form-grid-2 { grid-template-columns: 1fr; }
+    .modal { min-width: unset; width: 92vw; padding: 18px; }
+    .locales-grid { grid-template-columns: 1fr; }
+    .stats-row { gap: 8px; }
+    .stat-card { min-width: 90px; padding: 10px 12px; }
+    .week-card-head { flex-direction: column; align-items: flex-start; gap: 8px; }
+    #tab-enviados .section-header > div, #modal-sorteo .form-row > div { flex-wrap: wrap; }
+    .print-box { width: 92vw; padding: 16px; }
+    #excluir-sel + button, #excluir-sel { margin-bottom: 4px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📋 Gestión de Locales – Comunidad</h1>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <button id="btn-refresh" class="btn" style="color:#fff;border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.1);" onclick="refrescarApp()">🔄 Actualizar</button>
+    <button class="btn" style="color:#fff;border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.1);font-size:11px;" onclick="resetearDatos()" title="Elimina todos los datos y recarga los datos iniciales">⚠️ Resetear datos</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showTab('oficiales',this)">Oficiales</button>
+  <button class="tab-btn" onclick="showTab('locales',this)">Locales</button>
+  <button class="tab-btn" onclick="showTab('enviados',this)">Enviados</button>
+  <button class="tab-btn" onclick="showTab('hermanos',this)">Hermanos Disponibles</button>
+  <button class="tab-btn" onclick="showTab('sorteoenviados',this)">Sorteo de Enviados</button>
+</div>
+
+<!-- TAB OFICIALES -->
+<div id="tab-oficiales" class="tab-panel active">
+  <div class="section">
+    <div class="section-header">
+      <h2>Oficiales y Asesores</h2>
+      <button class="btn btn-primary" onclick="abrirModalOficial()">+ Agregar</button>
+    </div>
+    <div class="section-body">
+      <div class="stats-row" id="stats-oficiales"></div>
+      <div class="table-scroll">
+      <table id="table-oficiales">
+        <thead><tr><th>#</th><th>Nombre</th><th>Local</th><th>Zona</th><th>Rol</th><th>Acciones</th></tr></thead>
+        <tbody id="tbody-oficiales"></tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB LOCALES -->
+<div id="tab-locales" class="tab-panel">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+    <div style="display:flex;gap:8px;" id="filtros-locales">
+      <button class="btn btn-primary" onclick="setFiltro('all',this)">Todos</button>
+      <button class="btn" onclick="setFiltro('A',this)">Zona A</button>
+      <button class="btn" onclick="setFiltro('B',this)">Zona B</button>
+    </div>
+    <button class="btn btn-primary" onclick="abrirModalLocal()">+ Agregar Local</button>
+  </div>
+  <div id="locales-grid" class="locales-grid"></div>
+</div>
+
+<!-- TAB ENVIADOS -->
+<div id="tab-enviados" class="tab-panel">
+  <div class="section">
+    <div class="section-header">
+      <h2>Enviados a Locales Zona B</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="abrirSorteo('oficiales')">Sortear Oficiales</button>
+        <button class="btn btn-primary" onclick="abrirSorteo('guias')">Sortear Guías / Subguías</button>
+        <button class="btn btn-success" onclick="abrirExportar()">🖨️ Exportar / PDF</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div id="enviados-stats" class="stats-row"></div>
+      <div id="pool-info" style="margin-bottom:14px;"></div>
+      <div id="enviados-list" class="weeks-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB HERMANOS DISPONIBLES -->
+<div id="tab-hermanos" class="tab-panel">
+  <div class="section">
+    <div class="section-header">
+      <h2>🧍‍♂️ Hermanos Disponibles</h2>
+      <button class="btn btn-primary" onclick="abrirModalHermano()">+ Agregar Hermano</button>
+    </div>
+    <div class="section-body">
+      <div class="stats-row" id="stats-hermanos"></div>
+      <div class="table-scroll">
+      <table id="table-hermanos">
+        <thead><tr><th>#</th><th>Nombre</th><th>Local</th><th>Zona</th><th>Estado</th><th>Acciones</th></tr></thead>
+        <tbody id="tbody-hermanos"></tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB SORTEO DE ENVIADOS -->
+<div id="tab-sorteoenviados" class="tab-panel">
+  <div class="section">
+    <div class="section-header">
+      <h2>🎲 Sorteo de Enviados (Locales Zona B)</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="refrescarApp()">🔄 Actualizar</button>
+        <button class="btn" onclick="resetearSorteoActual()">↩️ Reiniciar sorteo actual</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="form-row" style="max-width:280px;">
+        <label>📅 Domingo del sorteo</label>
+        <input type="date" id="se-fecha">
+        <div style="font-size:11px;color:var(--muted);margin-top:4px;">Debe ser un día domingo.</div>
+      </div>
+      <button class="btn btn-primary" onclick="realizarSorteoEnviados()" style="margin-bottom:16px;">🎲 Realizar Sorteo</button>
+      <div id="se-resultado-wrap"></div>
+      <div id="se-guardar-wrap" style="display:none;margin-top:12px;">
+        <button class="btn btn-success" onclick="guardarSorteoEnviados()">💾 Guardar Sorteo</button>
+      </div>
+      <h3 style="margin-top:24px;font-size:14px;">Historial de sorteos guardados</h3>
+      <div id="se-historial" style="margin-top:10px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL OFICIAL -->
+<div class="modal-overlay" id="modal-oficial">
+  <div class="modal">
+    <h3 id="modal-oficial-titulo">Agregar Oficial</h3>
+    <input type="hidden" id="of-id">
+    <div class="form-grid-2">
+      <div><label>Nombre completo</label><input id="of-nombre" type="text" placeholder="Nombre"></div>
+      <div><label>Local que supervisa</label><input id="of-local" type="text" placeholder="Nombre del local"></div>
+    </div>
+    <div class="form-grid-2">
+      <div><label>Zona</label>
+        <select id="of-zona">
+          <option value="">Sin local / Sin zona</option>
+          <option value="A">Zona A</option>
+          <option value="B">Zona B</option>
+        </select>
+      </div>
+      <div><label>Rol</label>
+        <select id="of-rol">
+          <option value="oficial">Oficial</option>
+          <option value="asesor">Asesor</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-oficial')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarOficial()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LOCAL -->
+<div class="modal-overlay" id="modal-local">
+  <div class="modal">
+    <h3 id="modal-local-titulo">Agregar Local</h3>
+    <input type="hidden" id="loc-id">
+    <div class="form-grid-2">
+      <div><label>Nombre del local</label><input id="loc-nombre" type="text"></div>
+      <div><label>Zona</label>
+        <select id="loc-zona">
+          <option value="A">Zona A</option>
+          <option value="B">Zona B</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-grid-2">
+      <div><label>Guía</label><input id="loc-guia" type="text" placeholder="Nombre del guía"></div>
+      <div><label>Subguía</label><input id="loc-subguia" type="text" placeholder="Nombre del subguía"></div>
+    </div>
+    <div class="form-row"><label>Asesor/Oficial asignado</label><input id="loc-asesor" type="text" placeholder="Nombre"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-local')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarLocal()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR PERSONA -->
+<div class="modal-overlay" id="modal-edit">
+  <div class="modal">
+    <h3>Editar Nombre</h3>
+    <input type="hidden" id="edit-localId">
+    <input type="hidden" id="edit-campo">
+    <div class="form-row"><label>Nombre</label><input id="edit-nombre" type="text"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-edit')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicion()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TRASLADO -->
+<div class="modal-overlay" id="modal-traslado">
+  <div class="modal">
+    <h3>Trasladar Persona</h3>
+    <input type="hidden" id="traslado-origen-id">
+    <input type="hidden" id="traslado-origen-campo">
+    <input type="hidden" id="traslado-persona-nombre">
+    <div id="traslado-info-text" class="alert alert-info" style="margin-bottom:12px;"></div>
+    <div class="form-row"><label>Trasladar a local</label><select id="traslado-destino-sel"></select></div>
+    <div class="form-row"><label>Como</label>
+      <select id="traslado-rol-sel">
+        <option value="guia">Guía</option>
+        <option value="subguia">Subguía</option>
+        <option value="asesor">Asesor</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-traslado')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarTraslado()">Trasladar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SORTEO CONFIG -->
+<div class="modal-overlay" id="modal-sorteo">
+  <div class="modal">
+    <h3 id="sorteo-titulo">Configurar Sorteo</h3>
+    <div id="sorteo-info" class="alert alert-info" style="margin-bottom:12px;"></div>
+    <div class="form-row" style="border-bottom:1px solid var(--border);padding-bottom:12px;">
+      <label>📅 Domingo al que corresponde este sorteo</label>
+      <input type="date" id="sorteo-fecha">
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;">Debe ser un día domingo. Es obligatorio para poder realizar el sorteo.</div>
+    </div>
+    <div class="form-row">
+      <label>Excluir del sorteo</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select id="excluir-sel" style="flex:1;min-width:160px;"></select>
+        <button class="btn" onclick="agregarExcluido()">+ Excluir</button>
+      </div>
+      <div class="excluidos-wrap" id="excluidos-wrap"></div>
+    </div>
+
+    <!-- Incluir obligatoriamente -->
+    <div class="form-row" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+      <label>⭐ Incluir obligatoriamente (con local destino)</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <select id="oblig-nombre-sel" style="flex:2;min-width:130px;"></select>
+        <select id="oblig-local-sel" style="flex:2;min-width:130px;"></select>
+        <button class="btn btn-warn" onclick="agregarObligatorio()" style="flex-shrink:0;">+ Incluir</button>
+      </div>
+      <div class="obligatorios-wrap" id="obligatorios-wrap"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-sorteo')">Cancelar</button>
+      <button class="btn btn-primary" onclick="ejecutarSorteo()">Realizar Sorteo</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL RESULTADO -->
+<div class="modal-overlay" id="modal-resultado">
+  <div class="modal" style="max-width:640px;">
+    <h3 id="resultado-titulo">Resultado del Sorteo</h3>
+    <div id="resultado-stats" style="margin-bottom:12px;"></div>
+    <div class="alert alert-info" style="margin-bottom:10px;font-size:12px;">
+      💡 Usa <b>Cambiar</b> en cualquier fila si alguien presenta excusa.
+    </div>
+    <div id="resultado-body"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-resultado')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarResultado()">Confirmar y Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR ASIGNACIÓN CONFIRMADA -->
+<div class="modal-overlay" id="modal-editar-fila">
+  <div class="modal">
+    <h3>Editar Asignación</h3>
+    <input type="hidden" id="ef-semana-id">
+    <input type="hidden" id="ef-idx">
+    <div class="form-row"><label>Nombre</label><input id="ef-nombre" type="text"></div>
+    <div class="form-grid-2">
+      <div><label>Local asignado</label><input id="ef-local" type="text" list="ef-locales-list"><datalist id="ef-locales-list"></datalist></div>
+      <div><label>Rol</label>
+        <select id="ef-rol">
+          <option value="guia">Guía</option>
+          <option value="subguia">Subguía</option>
+          <option value="asesor">Asesor</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row"><label>Zona</label>
+      <select id="ef-zona">
+        <option value="A">Zona A</option>
+        <option value="B">Zona B</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-editar-fila')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionFila()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR FECHA DE SEMANA -->
+<div class="modal-overlay" id="modal-editar-fecha">
+  <div class="modal" style="min-width:300px;">
+    <h3>Editar Domingo de la Semana</h3>
+    <input type="hidden" id="efecha-semana-id">
+    <div class="form-row"><label>Domingo correspondiente</label><input type="date" id="efecha-valor"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-editar-fecha')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarEdicionFecha()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CAMBIO POR EXCUSA -->
+<div class="modal-overlay" id="modal-cambio">
+  <div class="modal">
+    <h3>Cambiar por Excusa</h3>
+    <input type="hidden" id="cambio-contexto" value="resultado">
+    <input type="hidden" id="cambio-semana-id">
+    <input type="hidden" id="cambio-idx">
+    <div id="cambio-info" class="alert alert-warn" style="margin-bottom:12px;"></div>
+    <div class="form-row"><label>Reemplazar con</label><select id="cambio-cand-sel"></select></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-cambio')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarCambio()">Confirmar Cambio</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EXPORTAR -->
+<div class="print-overlay" id="modal-exportar">
+  <div class="print-box">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+      <h3 style="font-size:16px;">🖨️ Exportar / Imprimir lista</h3>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" onclick="imprimirLista()">🖨️ Imprimir / PDF</button>
+        <button class="btn" onclick="cerrarExportar()">✕ Cerrar</button>
+      </div>
+    </div>
+    <div class="form-row"><label>¿Qué exportar?</label>
+      <select id="export-tipo" onchange="generarVista()">
+        <option value="ultima">Última semana registrada</option>
+        <option value="todas">Todas las semanas</option>
+        <option value="ofic">Solo Oficiales</option>
+        <option value="guias">Solo Guías / Subguías</option>
+      </select>
+    </div>
+    <div id="export-preview" style="margin-top:12px;"></div>
+  </div>
+</div>
+
+<!-- MODAL HERMANO (Agregar/Editar) -->
+<div class="modal-overlay" id="modal-hermano">
+  <div class="modal">
+    <h3 id="modal-hermano-titulo">Agregar Hermano</h3>
+    <input type="hidden" id="herm-id">
+    <div class="form-grid-2">
+      <div><label>Nombre completo</label><input id="herm-nombre" type="text" placeholder="Nombre"></div>
+      <div><label>Local</label><input id="herm-local" type="text" placeholder="Nombre del local"></div>
+    </div>
+    <div class="form-row"><label>Zona</label>
+      <select id="herm-zona">
+        <option value="">Sin local / Sin zona</option>
+        <option value="A">Zona A</option>
+        <option value="B">Zona B</option>
+      </select>
+    </div>
+    <input type="hidden" id="herm-rol" value="predicador">
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-hermano')">Cancelar</button>
+      <button class="btn btn-primary" onclick="guardarHermano()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TRASLADO HERMANO -->
+<div class="modal-overlay" id="modal-traslado-hermano">
+  <div class="modal">
+    <h3>Trasladar Hermano</h3>
+    <input type="hidden" id="th-id">
+    <div id="th-info" class="alert alert-info" style="margin-bottom:12px;"></div>
+    <div class="form-row"><label>Nuevo local</label><select id="th-local-sel"></select></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-traslado-hermano')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarTrasladoHermano()">Trasladar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CAMBIAR HERMANO ENVIADO -->
+<div class="modal-overlay" id="modal-cambiar-enviado">
+  <div class="modal">
+    <h3>Cambiar Hermano Enviado</h3>
+    <input type="hidden" id="cae-contexto">
+    <input type="hidden" id="cae-ref-id">
+    <input type="hidden" id="cae-idx">
+    <div id="cae-info" class="alert alert-warn" style="margin-bottom:12px;"></div>
+    <div class="form-row"><label>Reemplazar con</label><select id="cae-sel"></select></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="cerrarModal('modal-cambiar-enviado')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarCambioAsignacionEnviado()">Confirmar Cambio</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR ELIMINAR -->
+<div class="modal-overlay" id="modal-confirmar">
+  <div class="modal" style="max-width:380px;text-align:center;">
+    <h3 style="margin-bottom:12px;">⚠️ Confirmar eliminación</h3>
+    <p id="confirmar-msg" style="margin-bottom:20px;color:var(--muted);font-size:13px;"></p>
+    <div style="display:flex;gap:10px;justify-content:center;">
+      <button class="btn" onclick="cerrarModal('modal-confirmar')" style="flex:1;">Cancelar</button>
+      <button class="btn btn-danger" id="confirmar-ok-btn" style="flex:1;">Eliminar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================== ALMACENAMIENTO (localStorage) =====================
+let storageData = { oficiales: [], locales: [], semanas: [], hermanos: [], sorteosHermanos: [] };
+const STORAGE_KEY = 'comunidad_data_v2';
+
+function cargarDatos() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return { oficiales: [], locales: [], semanas: [], hermanos: [], sorteosHermanos: [] };
+    const parsed = JSON.parse(raw);
+    return {
+      oficiales: Array.isArray(parsed.oficiales) ? parsed.oficiales : [],
+      locales: Array.isArray(parsed.locales) ? parsed.locales : [],
+      semanas: Array.isArray(parsed.semanas) ? parsed.semanas : [],
+      hermanos: Array.isArray(parsed.hermanos) ? parsed.hermanos : [],
+      sorteosHermanos: Array.isArray(parsed.sorteosHermanos) ? parsed.sorteosHermanos : []
+    };
+  } catch (e) {
+    console.warn('No se pudo leer localStorage, se usará memoria temporal.', e);
+    return { oficiales: [], locales: [], semanas: [], hermanos: [], sorteosHermanos: [] };
+  }
+}
+
+function guardarDatos() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(storageData));
+  } catch (e) {
+    console.warn('No se pudo guardar en localStorage.', e);
+    alert('⚠️ No se pudo guardar en el almacenamiento local del navegador. Es posible que el espacio esté lleno o el navegador lo esté bloqueando (modo privado).');
+  }
+}
+
+function abrirDB() {
+  storageData = cargarDatos();
+  return Promise.resolve();
+}
+function dbGetAll(store) {
+  return Promise.resolve((storageData[store] || []).map(item => ({ ...item })));
+}
+function dbAdd(store, obj) {
+  const arr = storageData[store] || [];
+  const item = { ...obj, id: Date.now() + Math.floor(Math.random() * 100000) };
+  arr.push(item);
+  storageData[store] = arr;
+  guardarDatos();
+  return Promise.resolve(item.id);
+}
+function dbPut(store, obj) {
+  const arr = (storageData[store] || []).filter(item => item.id !== obj.id);
+  arr.push({ ...obj });
+  storageData[store] = arr;
+  guardarDatos();
+  return Promise.resolve(obj.id);
+}
+function dbDel(store, id) {
+  const numId = typeof id === 'number' ? id : parseInt(id, 10);
+  storageData[store] = (storageData[store] || []).filter(item => item.id !== numId);
+  guardarDatos();
+  return Promise.resolve();
+}
+
+// ===================== DATOS INICIALES =====================
+const INIT_OFICIALES = [
+  {nombre:'Francisco Albornoz',local:'Isla de Marchant',zona:'B',rol:'asesor'},
+  {nombre:'Luis Becerra',local:'Sin Local',zona:'',rol:'oficial'},
+  {nombre:'Rubén Lizama',local:'Mejillones',zona:'A',rol:'asesor'},
+  {nombre:'Marta Díaz',local:'El Pasillo',zona:'B',rol:'asesor'},
+  {nombre:'Joel Parra',local:'Aguas Negras',zona:'B',rol:'asesor'},
+  {nombre:'René Guerra',local:'Sin Local',zona:'',rol:'oficial'},
+  {nombre:'Jonás Herrera',local:'Sin Local',zona:'',rol:'oficial'},
+  {nombre:'Jeannine Hurtado',local:'Santa Fe',zona:'B',rol:'asesor'},
+  {nombre:'Silvia Maldonado',local:'Convento Viejo',zona:'B',rol:'asesor'},
+  {nombre:'Charles Menares',local:'El Porvenir',zona:'B',rol:'asesor'},
+  {nombre:'Brain Montero',local:'Sin Local',zona:'',rol:'oficial'},
+  {nombre:'José Luis Muñoz',local:'Santos Martínez',zona:'A',rol:'asesor'},
+  {nombre:'Luis Bustamante',local:'Prosperidad',zona:'A',rol:'asesor'},
+  {nombre:'Rodrigo Ortiz',local:'J. O. Arismendi',zona:'A',rol:'asesor'},
+  {nombre:'Carlos Ortiz',local:'Tutuquén Alto',zona:'B',rol:'asesor'},
+  {nombre:'Eliseo Ramos',local:'Sol de Septiembre',zona:'A',rol:'asesor'},
+  {nombre:'Adrián Reyes',local:'Sin Local',zona:'',rol:'oficial'},
+  {nombre:'Rosita Toro',local:'Vista Hermosa',zona:'B',rol:'asesor'},
+  {nombre:'Pedro Urbina',local:'Las Lilas',zona:'B',rol:'asesor'},
+  {nombre:'Priscilla Varas',local:'Sin Local',zona:'',rol:'oficial'},
+  {nombre:'Margarita Verdugo',local:'Los Aromos',zona:'B',rol:'asesor'},
+  {nombre:'David Antonio Díaz G.',local:'Ampurdán',zona:'B',rol:'asesor'},
+  {nombre:'Catalina Bravo Romero',local:'Sin Local',zona:'',rol:'oficial'},
+  {nombre:'Rodrigo Montecinos Muñoz',local:'El Cerro',zona:'A',rol:'asesor'},
+  {nombre:'Luis Díaz Fuentes',local:'Comalle',zona:'B',rol:'asesor'},
+  {nombre:'Luis Montero Montero',local:'Mataquito',zona:'A',rol:'asesor'},
+  {nombre:'Pablo González González',local:'Cuatro Bocas El Plumero',zona:'B',rol:'asesor'},
+  {nombre:'Sergio González Silva',local:'El Prado',zona:'B',rol:'asesor'},
+  {nombre:'Rodrigo Molina',local:'Manuel Rodríguez',zona:'A',rol:'asesor'},
+  {nombre:'Charles Menares',local:'Tutuquén Bajo',zona:'B',rol:'asesor'},
+];
+
+const INIT_LOCALES = [
+  {nombre:'El Cerro',zona:'A',guia:'Cecilia Valdés',subguia:'Alexis Garrido',asesor:'Rodrigo Montecinos Muñoz'},
+  {nombre:'J. O. Arismendi',zona:'A',guia:'Alfonso Céspedes',subguia:'Karen Trejo',asesor:'Rodrigo Ortiz'},
+  {nombre:'Manuel Rodríguez',zona:'A',guia:'Juan Sebastián Pérez',subguia:'',asesor:'Rodrigo Molina'},
+  {nombre:'Mataquito',zona:'A',guia:'Lorena Oyarce',subguia:'Gloria Romero',asesor:'Luis Montero Montero'},
+  {nombre:'Mejillones',zona:'A',guia:'Fresia Mardones',subguia:'David Andrés Díaz Puebla',asesor:'Rubén Lizama'},
+  {nombre:'Prosperidad',zona:'A',guia:'Hernán Martínez Martínez',subguia:'',asesor:'Luis Bustamante'},
+  {nombre:'Santos Martínez',zona:'A',guia:'Alexis Gallardo',subguia:'Ramón Bobadilla',asesor:'José Luis Muñoz'},
+  {nombre:'Sol de Septiembre',zona:'A',guia:'Raúl Rodríguez',subguia:'María del Carmen Aliaga Vargas',asesor:'Eliseo Ramos'},
+  {nombre:'Ampurdán',zona:'B',guia:'David Gallegos',subguia:'Daniela Angulo',asesor:'David Antonio Díaz G.'},
+  {nombre:'Convento Viejo',zona:'B',guia:'Boris González',subguia:'Luis González',asesor:'Silvia Maldonado'},
+  {nombre:'Comalle',zona:'B',guia:'Claudio Zúñiga',subguia:'Luis Pino',asesor:'Luis Díaz Fuentes'},
+  {nombre:'Cuatro Bocas El Plumero',zona:'B',guia:'Marcos Marambio',subguia:'Romerindo Castro',asesor:'Pablo González González'},
+  {nombre:'El Pasillo',zona:'B',guia:'José Céspedes',subguia:'Joel Céspedes',asesor:'Marta Díaz'},
+  {nombre:'El Prado',zona:'B',guia:'Salvador Contreras',subguia:'Rodrigo Montesinos Rojas',asesor:'Sergio González Silva'},
+  {nombre:'Isla de Marchant',zona:'B',guia:'Claudio Cabello',subguia:'',asesor:'Francisco Albornoz'},
+  {nombre:'Las Lilas',zona:'B',guia:'Mauricio Cubillos',subguia:'',asesor:'Pedro Urbina'},
+  {nombre:'Los Guindos',zona:'B',guia:'Raúl Reyes',subguia:'',asesor:''},
+  {nombre:'Vista Hermosa',zona:'B',guia:'Alvaro Palma',subguia:'Adela Contreras',asesor:'Rosita Toro'},
+  {nombre:'Aguas Negras',zona:'B',guia:'Marcos Venegas Muñoz',subguia:'Gilberto Bravo Sánchez',asesor:'Joel Parra'},
+  {nombre:'Los Aromos',zona:'B',guia:'Irene Flores',subguia:'Luis Cáceres',asesor:'Margarita Verdugo'},
+  {nombre:'Pedro Nolasco',zona:'B',guia:'Cristian Herrera Muñoz',subguia:'Angélica Núñez Adasme',asesor:'Eliseo Ramos'},
+  {nombre:'Santa Fe',zona:'B',guia:'Tecsia Menares Bravo',subguia:'',asesor:'Jeannine Hurtado'},
+  {nombre:'El Porvenir',zona:'B',guia:'Alex Maldonado Chávez',subguia:'María Jeanette Rojas Montesinos',asesor:'Charles Menares'},
+  {nombre:'Tutuquén Alto',zona:'B',guia:'José Díaz Guerrero',subguia:'Daniel Quintulem',asesor:'Carlos Ortiz'},
+  {nombre:'Tutuquén Bajo',zona:'B',guia:'Marcela Avendaño Rojas',subguia:'Isabel Rojas Oyarzún',asesor:'Charles Menares'},
+];
+
+// Construye la lista inicial de "hermanos disponibles" a partir de guías, subguías y oficiales/asesores
+function construirHermanosIniciales() {
+  const lista = [];
+  const vistos = new Set();
+  function agregar(nombre, local, zona, rol) {
+    if (!nombre || vistos.has(nombre)) return;
+    vistos.add(nombre);
+    lista.push({ nombre, local: local || '', zona: zona || '', rol, disponible: true });
+  }
+  INIT_LOCALES.forEach(l => {
+    agregar(l.guia, l.nombre, l.zona, 'guia');
+    agregar(l.subguia, l.nombre, l.zona, 'subguia');
+  });
+  INIT_OFICIALES.forEach(o => agregar(o.nombre, o.local, o.zona, o.rol));
+  return lista;
+}
+
+async function sembrarDatos() {
+  const ofs = await dbGetAll('oficiales');
+  if (ofs.length === 0) for (const o of INIT_OFICIALES) await dbAdd('oficiales', o);
+  const locs = await dbGetAll('locales');
+  if (locs.length === 0) for (const l of INIT_LOCALES) await dbAdd('locales', l);
+  const herms = await dbGetAll('hermanos');
+  if (herms.length === 0) for (const h of construirHermanosIniciales()) await dbAdd('hermanos', h);
+}
+
+// ===================== ESTADO =====================
+let filtroActual = 'all';
+let sorteoTipo = null;
+let sorteoFechaActual = null;
+let excluidos = [];
+let pendingResultado = null;
+
+function ordenarPorNombre(a, b) {
+  const na = (a?.nombre ?? a ?? '').toString();
+  const nb = (b?.nombre ?? b ?? '').toString();
+  return na.localeCompare(nb, 'es', { sensitivity: 'base' });
+}
+function ordenarStrings(a, b) {
+  return a.localeCompare(b, 'es', { sensitivity: 'base' });
+}
+function dedupPorNombre(lista) {
+  const vistos = new Set();
+  return lista.filter(x => {
+    const key = typeof x === 'string' ? x : x.nombre;
+    if (vistos.has(key)) return false;
+    vistos.add(key);
+    return true;
+  });
+}
+// Devuelve true si la cadena 'YYYY-MM-DD' corresponde a un día domingo
+function esDomingoISO(fechaISO) {
+  if (!fechaISO) return false;
+  const [y, m, d] = fechaISO.split('-').map(Number);
+  const fecha = new Date(y, (m || 1) - 1, d || 1);
+  return fecha.getDay() === 0;
+}
+// Fecha ISO (YYYY-MM-DD) del próximo domingo (o hoy si hoy es domingo)
+function proximoDomingoISO() {
+  const hoy = new Date();
+  const diff = (7 - hoy.getDay()) % 7;
+  hoy.setDate(hoy.getDate() + diff);
+  const y = hoy.getFullYear();
+  const m = String(hoy.getMonth() + 1).padStart(2, '0');
+  const d = String(hoy.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+// Formatea una fecha ISO 'YYYY-MM-DD' al formato es-CL sin desfase de zona horaria
+function formatearFechaISO(fechaISO) {
+  if (!fechaISO) return '';
+  const [y, m, d] = fechaISO.split('-').map(Number);
+  return new Date(y, (m || 1) - 1, d || 1).toLocaleDateString('es-CL', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+// ===================== TABS =====================
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  if (name === 'oficiales') renderOficiales();
+  if (name === 'locales') renderLocales();
+  if (name === 'enviados') renderEnviados();
+  if (name === 'hermanos') renderHermanos();
+  if (name === 'sorteoenviados') renderSorteoEnviados();
+}
+
+// ===================== MODALES =====================
+function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
+});
+
+// ===================== OFICIALES =====================
+async function renderOficiales() {
+  const ofs = await dbGetAll('oficiales');
+  const ordenados = [...ofs].sort(ordenarPorNombre);
+  const tbody = document.getElementById('tbody-oficiales');
+  const stats = document.getElementById('stats-oficiales');
+  const total = ofs.length;
+  const cA = ofs.filter(o => o.zona === 'A').length;
+  const cB = ofs.filter(o => o.zona === 'B').length;
+  const sinLocal = ofs.filter(o => !o.zona).length;
+  stats.innerHTML = `
+    <div class="stat-card"><div class="val">${total}</div><div class="lbl">Total</div></div>
+    <div class="stat-card"><div class="val">${cA}</div><div class="lbl">Zona A</div></div>
+    <div class="stat-card"><div class="val">${cB}</div><div class="lbl">Zona B</div></div>
+    <div class="stat-card"><div class="val">${sinLocal}</div><div class="lbl">Sin Local</div></div>
+  `;
+  tbody.innerHTML = ordenados.map((o, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${o.nombre}</td>
+      <td>${o.local || '—'}</td>
+      <td>${o.zona ? `<span class="badge badge-${o.zona.toLowerCase()}">Zona ${o.zona}</span>` : '—'}</td>
+      <td><span class="badge ${o.rol==='asesor'?'badge-guia':'badge-subguia'}">${o.rol}</span></td>
+      <td style="display:flex;gap:4px;">
+        <button class="btn btn-sm" onclick="editarOficial(${o.id})">✏️ Editar</button>
+        <button class="btn btn-sm" onclick="abrirTrasladoOficial(${o.id})">🔀 Trasladar</button>
+        <button class="btn btn-sm btn-danger" onclick="eliminarOficial(${o.id})">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+function abrirModalOficial() {
+  document.getElementById('of-id').value = '';
+  document.getElementById('of-nombre').value = '';
+  document.getElementById('of-local').value = '';
+  document.getElementById('of-zona').value = '';
+  document.getElementById('of-rol').value = 'oficial';
+  document.getElementById('modal-oficial-titulo').textContent = 'Agregar Oficial';
+  abrirModal('modal-oficial');
+}
+
+async function editarOficial(id) {
+  const ofs = await dbGetAll('oficiales');
+  const o = ofs.find(x => x.id === id);
+  document.getElementById('of-id').value = id;
+  document.getElementById('of-nombre').value = o.nombre;
+  document.getElementById('of-local').value = o.local || '';
+  document.getElementById('of-zona').value = o.zona || '';
+  document.getElementById('of-rol').value = o.rol || 'oficial';
+  document.getElementById('modal-oficial-titulo').textContent = 'Editar Oficial';
+  abrirModal('modal-oficial');
+}
+
+async function guardarOficial() {
+  const id = document.getElementById('of-id').value;
+  const nombre = document.getElementById('of-nombre').value.trim();
+  if (!nombre) return alert('Ingresa el nombre');
+  const nuevoLocal = document.getElementById('of-local').value.trim();
+  const nuevaZona = document.getElementById('of-zona').value;
+  const obj = { nombre, local: nuevoLocal, zona: nuevaZona, rol: document.getElementById('of-rol').value };
+
+  let anterior = null;
+  if (id) {
+    obj.id = parseInt(id);
+    const ofsPrevios = await dbGetAll('oficiales');
+    anterior = ofsPrevios.find(o => o.id === obj.id);
+    await dbPut('oficiales', obj);
+  } else {
+    await dbAdd('oficiales', obj);
+  }
+
+  // Sincronizar con la hoja de Locales (campo "asesor")
+  const locs = await dbGetAll('locales');
+  if (anterior && anterior.local && (anterior.local !== nuevoLocal || anterior.nombre !== nombre)) {
+    const locAnterior = locs.find(l => l.nombre === anterior.local && l.asesor === anterior.nombre);
+    if (locAnterior) { locAnterior.asesor = ''; await dbPut('locales', locAnterior); }
+  }
+  if (nuevoLocal) {
+    const locNuevo = locs.find(l => l.nombre === nuevoLocal);
+    if (locNuevo && locNuevo.asesor !== nombre) { locNuevo.asesor = nombre; await dbPut('locales', locNuevo); }
+  }
+
+  cerrarModal('modal-oficial');
+  renderOficiales();
+  renderLocales();
+}
+
+function eliminarOficial(id) {
+  document.getElementById('confirmar-msg').textContent = '¿Eliminar este oficial? Esta acción no se puede deshacer.';
+  document.getElementById('confirmar-ok-btn').onclick = async () => {
+    cerrarModal('modal-confirmar');
+    await dbDel('oficiales', parseInt(id, 10));
+    await renderOficiales();
+  };
+  abrirModal('modal-confirmar');
+}
+
+async function abrirTrasladoOficial(id) {
+  const ofs = await dbGetAll('oficiales');
+  const o = ofs.find(x => x.id === id);
+  const locs = await dbGetAll('locales');
+  document.getElementById('traslado-info-text').textContent = `Trasladando: ${o.nombre}`;
+  document.getElementById('traslado-origen-id').value = id;
+  document.getElementById('traslado-origen-campo').value = '__oficial__';
+  document.getElementById('traslado-persona-nombre').value = o.nombre;
+  document.getElementById('traslado-destino-sel').innerHTML = locs.map(l =>
+    `<option value="${l.id}">${l.nombre} (Zona ${l.zona})</option>`).join('');
+  document.getElementById('traslado-rol-sel').value = 'asesor';
+  abrirModal('modal-traslado');
+}
+
+// ===================== LOCALES =====================
+function setFiltro(f, btn) {
+  filtroActual = f;
+  document.querySelectorAll('#filtros-locales .btn').forEach(b => b.classList.remove('btn-primary'));
+  btn.classList.add('btn-primary');
+  renderLocales();
+}
+
+async function renderLocales() {
+  const locs = await dbGetAll('locales');
+  const filtrados = filtroActual === 'all' ? locs : locs.filter(l => l.zona === filtroActual);
+  filtrados.sort((a, b) => a.zona.localeCompare(b.zona) || a.nombre.localeCompare(b.nombre));
+  const grid = document.getElementById('locales-grid');
+  grid.innerHTML = '';
+  filtrados.forEach(loc => {
+    const card = document.createElement('div');
+    card.className = 'local-card';
+    card.innerHTML = `
+      <div class="local-card-head">
+        <span class="lname">${loc.nombre}</span>
+        <span class="badge badge-${loc.zona.toLowerCase()}">Zona ${loc.zona}</span>
+      </div>
+      <div class="local-card-body">
+        ${filaPersona('Guía', loc.guia, loc.id, 'guia')}
+        ${filaPersona('Subguía', loc.subguia, loc.id, 'subguia')}
+        ${filaPersona('Asesor', loc.asesor, loc.id, 'asesor')}
+        <div style="margin-top:8px;display:flex;justify-content:flex-end;gap:6px;">
+          <button class="btn btn-sm btn-primary" onclick="editarLocal(${loc.id})">✏️ Editar</button>
+          <button class="btn btn-sm btn-danger" onclick="eliminarLocal(${loc.id})">🗑️</button>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function filaPersona(rol, nombre, locId, campo) {
+  const n = nombre || '—';
+  const acciones = nombre ? `
+    <button class="btn btn-sm" onclick="abrirEditarPersona(${locId},'${campo}')" style="padding:2px 5px;">✏️</button>
+    <button class="btn btn-sm" onclick="abrirTrasladoLocal(${locId},'${campo}')" style="padding:2px 5px;">🔀</button>` : '';
+  return `<div class="person-row"><span class="person-role">${rol}</span><span class="person-name">${n}</span><div style="display:flex;gap:3px;">${acciones}</div></div>`;
+}
+
+function abrirModalLocal() {
+  document.getElementById('loc-id').value = '';
+  ['loc-nombre','loc-guia','loc-subguia','loc-asesor'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('loc-zona').value = 'A';
+  document.getElementById('modal-local-titulo').textContent = 'Agregar Local';
+  abrirModal('modal-local');
+}
+
+async function editarLocal(id) {
+  const locs = await dbGetAll('locales');
+  const l = locs.find(x => x.id === id);
+  document.getElementById('loc-id').value = id;
+  document.getElementById('loc-nombre').value = l.nombre;
+  document.getElementById('loc-zona').value = l.zona;
+  document.getElementById('loc-guia').value = l.guia || '';
+  document.getElementById('loc-subguia').value = l.subguia || '';
+  document.getElementById('loc-asesor').value = l.asesor || '';
+  document.getElementById('modal-local-titulo').textContent = 'Editar Local';
+  abrirModal('modal-local');
+}
+
+async function guardarLocal() {
+  const id = document.getElementById('loc-id').value;
+  const nombre = document.getElementById('loc-nombre').value.trim();
+  if (!nombre) return alert('Ingresa el nombre del local');
+  const zona = document.getElementById('loc-zona').value;
+  const asesor = document.getElementById('loc-asesor').value.trim();
+  const obj = {
+    nombre, zona,
+    guia: document.getElementById('loc-guia').value.trim(),
+    subguia: document.getElementById('loc-subguia').value.trim(),
+    asesor
+  };
+
+  let anterior = null;
+  if (id) {
+    obj.id = parseInt(id);
+    const locsPrevios = await dbGetAll('locales');
+    anterior = locsPrevios.find(l => l.id === obj.id);
+    await dbPut('locales', obj);
+  } else {
+    await dbAdd('locales', obj);
+  }
+
+  // Sincronizar con la hoja de Oficiales
+  const ofs = await dbGetAll('oficiales');
+  if (anterior && anterior.asesor && (anterior.asesor !== asesor || anterior.nombre !== nombre)) {
+    const ofAnterior = ofs.find(o => o.nombre === anterior.asesor && o.local === anterior.nombre);
+    if (ofAnterior) { ofAnterior.local = ''; ofAnterior.zona = ''; await dbPut('oficiales', ofAnterior); }
+  }
+  if (asesor) {
+    const ofNuevo = ofs.find(o => o.nombre === asesor);
+    if (ofNuevo && (ofNuevo.local !== nombre || ofNuevo.zona !== zona)) {
+      ofNuevo.local = nombre; ofNuevo.zona = zona; await dbPut('oficiales', ofNuevo);
+    }
+  }
+
+  cerrarModal('modal-local');
+  renderLocales();
+  renderOficiales();
+}
+
+function eliminarLocal(id) {
+  document.getElementById('confirmar-msg').textContent = '¿Eliminar este local? Esta acción no se puede deshacer.';
+  document.getElementById('confirmar-ok-btn').onclick = async () => {
+    cerrarModal('modal-confirmar');
+    await dbDel('locales', parseInt(id, 10));
+    await renderLocales();
+  };
+  abrirModal('modal-confirmar');
+}
+
+async function abrirEditarPersona(locId, campo) {
+  const locs = await dbGetAll('locales');
+  const l = locs.find(x => x.id === locId);
+  document.getElementById('edit-localId').value = locId;
+  document.getElementById('edit-campo').value = campo;
+  document.getElementById('edit-nombre').value = l[campo] || '';
+  abrirModal('modal-edit');
+}
+
+async function guardarEdicion() {
+  const locId = parseInt(document.getElementById('edit-localId').value);
+  const campo = document.getElementById('edit-campo').value;
+  const nombre = document.getElementById('edit-nombre').value.trim();
+  const locs = await dbGetAll('locales');
+  const l = locs.find(x => x.id === locId);
+  const nombreAnterior = l[campo];
+  l[campo] = nombre;
+  await dbPut('locales', l);
+
+  if (campo === 'asesor') {
+    const ofs = await dbGetAll('oficiales');
+    if (nombreAnterior && nombreAnterior !== nombre) {
+      const ofAnterior = ofs.find(o => o.nombre === nombreAnterior && o.local === l.nombre);
+      if (ofAnterior) { ofAnterior.local = ''; ofAnterior.zona = ''; await dbPut('oficiales', ofAnterior); }
+    }
+    if (nombre) {
+      const ofNuevo = ofs.find(o => o.nombre === nombre);
+      if (ofNuevo && (ofNuevo.local !== l.nombre || ofNuevo.zona !== l.zona)) {
+        ofNuevo.local = l.nombre; ofNuevo.zona = l.zona; await dbPut('oficiales', ofNuevo);
+      }
+    }
+    renderOficiales();
+  }
+  cerrarModal('modal-edit');
+  renderLocales();
+}
+
+async function abrirTrasladoLocal(locId, campo) {
+  const locs = await dbGetAll('locales');
+  const l = locs.find(x => x.id === locId);
+  const nombre = l[campo];
+  document.getElementById('traslado-info-text').textContent = `Trasladando: ${nombre} (${campo}) desde ${l.nombre}`;
+  document.getElementById('traslado-origen-id').value = locId;
+  document.getElementById('traslado-origen-campo').value = campo;
+  document.getElementById('traslado-persona-nombre').value = nombre;
+  const otros = locs.filter(x => x.id !== locId);
+  document.getElementById('traslado-destino-sel').innerHTML = otros.map(x =>
+    `<option value="${x.id}">${x.nombre} (Zona ${x.zona})</option>`).join('');
+  document.getElementById('traslado-rol-sel').value = campo === 'asesor' ? 'asesor' : campo;
+  abrirModal('modal-traslado');
+}
+
+async function confirmarTraslado() {
+  const origenId = parseInt(document.getElementById('traslado-origen-id').value);
+  const campo = document.getElementById('traslado-origen-campo').value;
+  const nombre = document.getElementById('traslado-persona-nombre').value;
+  const destinoId = parseInt(document.getElementById('traslado-destino-sel').value);
+  const rolDestino = document.getElementById('traslado-rol-sel').value;
+  const locs = await dbGetAll('locales');
+  const destino = locs.find(l => l.id === destinoId);
+  destino[rolDestino] = nombre;
+  await dbPut('locales', destino);
+  if (campo !== '__oficial__') {
+    const origen = locs.find(l => l.id === origenId);
+    origen[campo] = '';
+    await dbPut('locales', origen);
+  }
+  // Sincronizar siempre con la hoja de Oficiales
+  const ofs = await dbGetAll('oficiales');
+  const of = ofs.find(o => o.nombre === nombre);
+  if (of) {
+    of.local = rolDestino === 'asesor' ? destino.nombre : '';
+    of.zona = rolDestino === 'asesor' ? destino.zona : '';
+    await dbPut('oficiales', of);
+  }
+  cerrarModal('modal-traslado');
+  renderLocales();
+  renderOficiales();
+}
+
+// ===================== ENVIADOS =====================
+async function renderEnviados() {
+  const semanas = await dbGetAll('semanas');
+  semanas.sort((a,b) => b.id - a.id);
+  const sOf = semanas.filter(s => s.tipo === 'oficiales');
+  const sG = semanas.filter(s => s.tipo === 'guias');
+  document.getElementById('enviados-stats').innerHTML = `
+    <div class="stat-card"><div class="val">${semanas.length}</div><div class="lbl">Semanas totales</div></div>
+    <div class="stat-card"><div class="val">${sOf.length}</div><div class="lbl">Sorteos Oficiales</div></div>
+    <div class="stat-card"><div class="val">${sG.length}</div><div class="lbl">Sorteos Guías</div></div>
+  `;
+  await renderPoolInfo();
+  const list = document.getElementById('enviados-list');
+  if (!semanas.length) {
+    list.innerHTML = '<div class="alert alert-info">No hay semanas registradas aún. Usa los botones de sorteo para comenzar.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  semanas.forEach(s => {
+    const tagCls = s.tipo === 'oficiales' ? 'badge-guia' : 'badge-subguia';
+    const tagTxt = s.tipo === 'oficiales' ? 'Oficiales' : 'Guías / Subguías';
+    const asigOriginal = s.asignaciones || [];
+    // Ordenamos por índices reales para no perder la correspondencia con el arreglo guardado
+    const ordenIdx = asigOriginal.map((_, i) => i).sort((ia, ib) => ordenarPorNombre(asigOriginal[ia], asigOriginal[ib]));
+    const asignaciones = ordenIdx.map(i => asigOriginal[i]);
+    const div = document.createElement('div');
+    div.className = 'week-card';
+    div.innerHTML = `
+      <div class="week-card-head">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <span class="badge ${tagCls}">${tagTxt}</span>
+          <span style="font-size:13px;font-weight:600;">Semana del ${s.fecha}</span>
+          <button class="btn btn-sm" onclick="abrirEditarFecha(${s.id})" title="Editar el domingo de esta semana">✏️ Fecha</button>
+        </div>
+        <button class="btn btn-sm btn-danger" onclick="eliminarSemana(${s.id})">🗑️</button>
+      </div>
+      <div style="padding:12px 16px;">
+        <div style="display:flex;flex-wrap:wrap;">
+          ${ordenIdx.map(i => { const a = asigOriginal[i]; return `<div class="sent-chip${a.obligatorio?' obligatorio':''}" style="display:flex;align-items:center;gap:6px;">
+            <span>${a.obligatorio?'⭐ ':''}${a.nombre}</span>
+            ${a.local ? `<span style="color:var(--muted);">→ ${a.local}</span>` : ''}
+            <button class="btn btn-sm" onclick="abrirEditarFila(${s.id}, ${i})" title="Editar todos los datos de esta fila">✏️</button>
+            <button class="btn btn-sm" onclick="abrirCambioSemana(${s.id}, ${i})" title="Cambiar por otra persona">🔄</button>
+          </div>`; }).join('')}
+        </div>
+        ${s.excluidos&&s.excluidos.length ? `<p style="margin-top:8px;font-size:12px;color:var(--muted);">Excluidos: ${s.excluidos.join(', ')}</p>` : ''}
+        ${s.cambios&&s.cambios.length ? `<p style="margin-top:4px;font-size:12px;color:#d68910;">Cambios: ${s.cambios.map(c=>c.anterior+' → '+c.nuevo).join(', ')}</p>` : ''}
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+async function renderPoolInfo() {
+  const semanas = await dbGetAll('semanas');
+  const ofs = await dbGetAll('oficiales');
+  const locs = await dbGetAll('locales');
+  const pool = document.getElementById('pool-info');
+  // Oficiales
+  const yaEnvOf = new Set(semanas.filter(s=>s.tipo==='oficiales').flatMap(s=>s.asignaciones.map(a=>a.nombre)));
+  const totalOf = ofs.length;
+  const restOf = ofs.filter(o => !yaEnvOf.has(o.nombre)).length;
+  // Guías
+  const yaEnvG = new Set(semanas.filter(s=>s.tipo==='guias').flatMap(s=>s.asignaciones.map(a=>a.nombre+'__'+a.rolOrigen)));
+  const todosGuias = locs.flatMap(l => {
+    const r = [];
+    if (l.guia) r.push(l.guia+'__guia');
+    if (l.subguia) r.push(l.subguia+'__subguia');
+    return r;
+  });
+  const totalG = todosGuias.length;
+  const restG = todosGuias.filter(k => !yaEnvG.has(k)).length;
+  const pOf = totalOf > 0 ? Math.round((totalOf - restOf)/totalOf*100) : 0;
+  const pG = totalG > 0 ? Math.round((totalG - restG)/totalG*100) : 0;
+  pool.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;">POOL OFICIALES</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:${pOf}%"></div></div>
+        <div style="font-size:12px;color:var(--muted);">${restOf} pendientes de ${totalOf} (${100-pOf}% restante)</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;">
+        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;">POOL GUÍAS / SUBGUÍAS</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:${pG}%"></div></div>
+        <div style="font-size:12px;color:var(--muted);">${restG} pendientes de ${totalG} (${100-pG}% restante)</div>
+      </div>
+    </div>`;
+}
+
+function eliminarSemana(id) {
+  document.getElementById('confirmar-msg').textContent = '¿Eliminar este registro de semana? Esta acción no se puede deshacer.';
+  document.getElementById('confirmar-ok-btn').onclick = async () => {
+    cerrarModal('modal-confirmar');
+    await dbDel('semanas', parseInt(id, 10));
+    await renderEnviados();
+  };
+  abrirModal('modal-confirmar');
+}
+
+// ===================== SORTEO =====================
+async function abrirSorteo(tipo) {
+  sorteoTipo = tipo;
+  excluidos = []; obligatorios = [];
+  document.getElementById('excluidos-wrap').innerHTML = '';
+  document.getElementById('obligatorios-wrap').innerHTML = '';
+  document.getElementById('sorteo-titulo').textContent = tipo === 'oficiales' ? 'Sorteo de Oficiales' : 'Sorteo de Guías y Subguías';
+  document.getElementById('sorteo-fecha').value = proximoDomingoISO();
+
+  const candidatos = await obtenerCandidatos(tipo);
+  const localesB = await dbGetAll('locales').then(l => l.filter(x => x.zona === 'B'));
+
+  if (tipo === 'oficiales') {
+    document.getElementById('sorteo-info').innerHTML =
+      `<b>${candidatos.length}</b> candidatos disponibles para <b>${localesB.length}</b> locales Zona B.<br>
+      Regla: máx 50% de asesores Zona B; cada asesor va a su local propio.`;
+  } else {
+    const total = localesB.length;
+    document.getElementById('sorteo-info').innerHTML =
+      `<b>${candidatos.length}</b> candidatos disponibles para <b>${localesB.length}</b> locales Zona B.<br>
+      Composición: todos los candidatos son guías/subguías de Zona A; se asignan <b>${total}</b> personas.`;
+  }
+
+  document.getElementById('excluir-sel').innerHTML =
+    '<option value="">-- seleccionar --</option>' +
+    candidatos.map(c => `<option value="${escH(c)}">${c}</option>`).join('');
+  await poblarSelOblig(tipo);
+  abrirModal('modal-sorteo');
+}
+
+async function obtenerCandidatos(tipo) {
+  const semanas = await dbGetAll('semanas');
+  if (tipo === 'oficiales') {
+    const ofs = await dbGetAll('oficiales');
+    const yaEnv = new Set(semanas.filter(s=>s.tipo==='oficiales').flatMap(s=>s.asignaciones.map(a=>a.nombre)));
+    // Si todos han sido enviados, reiniciar (excepto excluidos)
+    const pendientes = ofs.filter(o => !yaEnv.has(o.nombre));
+    if (pendientes.length === 0) {
+      // Reinicio del ciclo
+      return ofs.map(o => o.nombre).sort(ordenarStrings);
+    }
+    return pendientes.map(o => o.nombre).sort(ordenarStrings);
+  } else {
+    const locs = await dbGetAll('locales');
+    const yaEnv = new Set(semanas.filter(s=>s.tipo==='guias').flatMap(s=>s.asignaciones.map(a=>a.nombre+'__'+a.rolOrigen)));
+    const candidatos = [];
+    locs.forEach(l => {
+      if (l.zona !== 'B') {
+        if (l.guia) {
+          const key = l.guia+'__guia';
+          if (!yaEnv.has(key)) candidatos.push(l.guia + ` [Guía-${l.zona}]`);
+        }
+        if (l.subguia) {
+          const key = l.subguia+'__subguia';
+          if (!yaEnv.has(key)) candidatos.push(l.subguia + ` [Subguía-${l.zona}]`);
+        }
+      }
+    });
+    // Si vacío reiniciar, pero también excluimos siempre a Zona B
+    if (candidatos.length === 0) {
+      locs.forEach(l => {
+        if (l.zona !== 'B') {
+          if (l.guia) candidatos.push(l.guia + ` [Guía-${l.zona}]`);
+          if (l.subguia) candidatos.push(l.subguia + ` [Subguía-${l.zona}]`);
+        }
+      });
+    }
+    return [...new Set(candidatos)].sort(ordenarStrings);
+  }
+}
+
+function agregarExcluido() {
+  const sel = document.getElementById('excluir-sel');
+  const val = sel.value;
+  if (!val || excluidos.includes(val)) return;
+  excluidos.push(val);
+  renderExcluidos();
+}
+function quitarExcluido(i) {
+  excluidos.splice(i, 1);
+  renderExcluidos();
+}
+function renderExcluidos() {
+  document.getElementById('excluidos-wrap').innerHTML = excluidos.map((n, i) =>
+    `<span class="excluido-tag">${n}<button onclick="quitarExcluido(${i})">×</button></span>`).join('');
+}
+
+function mezclar(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+async function ejecutarSorteo() {
+  const fechaISO = document.getElementById('sorteo-fecha').value;
+  if (!fechaISO) { alert('Debes asignar el domingo al que pertenece este sorteo antes de continuar.'); return; }
+  if (!esDomingoISO(fechaISO)) { alert('La fecha seleccionada no es un domingo. Selecciona un domingo válido.'); return; }
+  sorteoFechaActual = fechaISO;
+  if (sorteoTipo === 'oficiales') await sortearOficiales();
+  else await sortearGuias();
+}
+
+async function sortearOficiales() {
+  const ofs = await dbGetAll('oficiales');
+  const locs = await dbGetAll('locales');
+  const localesB = locs.filter(l => l.zona === 'B');
+  const semanas = await dbGetAll('semanas');
+  const yaEnv = new Set(semanas.filter(s=>s.tipo==='oficiales').flatMap(s=>s.asignaciones.map(a=>a.nombre)));
+
+  // Nombres de obligatorios (van fijos, no entran al sorteo aleatorio)
+  const nombresOblig = (obligatorios || []).map(o => o.nombre);
+
+  // Pool: pendientes excluyendo ya enviados, excluidos y obligatorios
+  const pendientes = ofs.filter(o =>
+    !yaEnv.has(o.nombre) &&
+    !excluidos.some(e => e.startsWith(o.nombre)) &&
+    !nombresOblig.includes(o.nombre)
+  );
+  // Si todos fueron enviados, reiniciar ciclo
+  const poolBase = pendientes.length > 0
+    ? pendientes
+    : ofs.filter(o => !excluidos.some(e => e.startsWith(o.nombre)) && !nombresOblig.includes(o.nombre));
+  // Un mismo nombre no puede aparecer dos veces en el sorteo
+  const pool = dedupPorNombre(poolBase);
+
+  // Locales disponibles = todos los de Zona B menos los que ya tienen obligatorio asignado
+  const localesOcupados = new Set((obligatorios || []).map(o => o.local));
+  const locDisp = localesB.filter(l => !localesOcupados.has(l.nombre));
+  const total = locDisp.length; // locales que deben cubrirse con el sorteo
+  const maxB = Math.floor(localesB.length * 0.5); // máx 50% zona B del total original
+
+  // Separar pool en zona B (asesores) y resto
+  const poolB     = mezclar(pool.filter(o => o.zona === 'B' && o.local && o.local !== 'Sin Local'));
+  const poolOtros = mezclar(pool.filter(o => !(o.zona === 'B' && o.local && o.local !== 'Sin Local')));
+
+  const elegidosB     = poolB.slice(0, Math.min(maxB, poolB.length, total));
+  const falta         = total - elegidosB.length;
+  const elegidosOtros = poolOtros.slice(0, Math.min(falta, poolOtros.length));
+  const elegidos      = mezclar([...elegidosB, ...elegidosOtros]);
+
+  // Asignaciones: primero los obligatorios con su local fijo
+  const asignaciones = (obligatorios || []).map(ob => ({
+    nombre: ob.nombre, local: ob.local, rolOrigen: 'asesor', zona: '★', obligatorio: true
+  }));
+
+  // Asignar elegidos: cada asesor va a su local propio si está disponible
+  const locDispCopia = [...locDisp];
+  for (const o of elegidos) {
+    const suLocal = locDispCopia.find(l => l.asesor === o.nombre || l.nombre === o.local);
+    if (suLocal) {
+      asignaciones.push({nombre: o.nombre, local: suLocal.nombre, rolOrigen: o.rol, zona: o.zona});
+      locDispCopia.splice(locDispCopia.indexOf(suLocal), 1);
+    }
+  }
+  // Los que no encontraron su local, asignar a los restantes aleatoriamente
+  const sinAsignar = elegidos.filter(o => !asignaciones.find(a => a.nombre === o.nombre));
+  const locResto   = mezclar(locDispCopia);
+  sinAsignar.forEach((o, i) => {
+    asignaciones.push({nombre: o.nombre, local: locResto[i]?.nombre || '(sin local)', rolOrigen: o.rol, zona: o.zona});
+  });
+
+  mostrarResultado('oficiales', asignaciones);
+}
+
+async function sortearGuias() {
+  const locs = await dbGetAll('locales');
+  const localesB = locs.filter(l => l.zona === 'B');
+  const localesA = locs.filter(l => l.zona === 'A');
+  const semanas = await dbGetAll('semanas');
+  const yaEnv = new Set(semanas.filter(s=>s.tipo==='guias').flatMap(s=>s.asignaciones.map(a=>a.nombre+'__'+a.rolOrigen)));
+  const total = localesB.length;
+  const nB = 0;
+  const nRest = total - nB;
+  const nGuiasA = Math.ceil(nRest / 2);
+  const nSubA = nRest - nGuiasA;
+
+  const nombresOblig = (obligatorios || []).map(o => o.nombre);
+  function pendientesO(lista, tipo) {
+    const base = lista.filter(x => !nombresOblig.includes(x.nombre));
+    const p = base.filter(x => !yaEnv.has(x.nombre+'__'+tipo) && !excluidos.some(e => e.includes(x.nombre)));
+    return p.length > 0 ? p : base.filter(x => !excluidos.some(e => e.includes(x.nombre)));
+  }
+
+  const guiasB = [];
+  const subguiasB = [];
+  const guiasA = localesA.filter(l=>l.guia).map(l=>({nombre:l.guia,rol:'guia',zona:'A',local:l.nombre}));
+  const subguiasA = localesA.filter(l=>l.subguia).map(l=>({nombre:l.subguia,rol:'subguia',zona:'A',local:l.nombre}));
+
+  // Un mismo nombre no puede aparecer dos veces en el sorteo, aunque sirva en más de un local/rol
+  const nombresElegidos = new Set();
+  function elegirSinRepetir(candidatosMezclados, cantidad) {
+    const elegidos = [];
+    for (const c of candidatosMezclados) {
+      if (elegidos.length >= cantidad) break;
+      if (nombresElegidos.has(c.nombre)) continue;
+      elegidos.push(c);
+      nombresElegidos.add(c.nombre);
+    }
+    return elegidos;
+  }
+
+  const candB = mezclar(dedupPorNombre([...pendientesO(guiasB,'guia'), ...pendientesO(subguiasB,'subguia')]));
+  const elegidosB = elegirSinRepetir(candB, nB);
+  const candGA = mezclar(dedupPorNombre(pendientesO(guiasA,'guia')));
+  const elegidosGA = elegirSinRepetir(candGA, nGuiasA);
+  const candSA = mezclar(dedupPorNombre(pendientesO(subguiasA,'subguia')));
+  const elegidosSA = elegirSinRepetir(candSA, nSubA);
+  const todos = mezclar([...elegidosB, ...elegidosGA, ...elegidosSA]);
+  // Obligatorios con local fijo
+  const asignaciones = (obligatorios || []).map(ob => ({
+    nombre: ob.nombre, local: ob.local, rolOrigen: '?', zona: '★', obligatorio: true
+  }));
+  const localesOcup = new Set((obligatorios || []).map(o => o.local));
+  const locBDisp = mezclar(localesB.filter(l => !localesOcup.has(l.nombre)));
+  todos.forEach((p, i) => {
+    asignaciones.push({nombre: p.nombre, local: locBDisp[i]?.nombre || '—', rolOrigen: p.rol, zona: p.zona});
+  });
+  mostrarResultado('guias', asignaciones);
+}
+
+function renderTablaResultado(){
+  const asignaciones=[...(pendingResultado.asignaciones || [])].sort((a, b) => ordenarPorNombre(a, b));
+  document.getElementById('resultado-body').innerHTML=`
+    <div style="max-height:380px;overflow-y:auto;overflow-x:auto;">
+      <table>
+        <thead><tr><th>Nombre</th><th>Rol/Zona</th><th>Local Asignado</th><th></th></tr></thead>
+        <tbody>${asignaciones.map((a,i)=>`<tr style="${a.obligatorio?'background:#fff9e6;':''}">
+          <td>${a.obligatorio?'⭐ ':''}${a.nombre}</td>
+          <td><span class="badge badge-${(a.zona||'').replace('*','').toLowerCase()||'a'}">${a.rolOrigen||'—'} ${a.zona!=='*'?a.zona:'obligatorio'}</span></td>
+          <td>${a.local}</td>
+          <td><button class="btn btn-sm btn-warn" onclick="abrirCambio(${i})">🔄 Cambiar</button></td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>`;
+}
+
+function mostrarResultado(tipo, asignaciones) {
+  const ordenadas = [...asignaciones].sort((a, b) => ordenarPorNombre(a, b));
+  pendingResultado = { tipo, fecha: sorteoFechaActual, asignaciones: ordenadas, excluidos: [...excluidos], cambios: [] };
+  document.getElementById('resultado-titulo').textContent = tipo === 'oficiales' ? 'Resultado – Oficiales' : 'Resultado – Guías y Subguías';
+  let stats = `<div class="alert alert-info" style="margin-bottom:8px;">📅 Semana del <b>${formatearFechaISO(sorteoFechaActual)}</b></div>`;
+  if (tipo === 'guias') {
+    const nB = asignaciones.filter(a=>a.zona==='B').length;
+    const nGA = asignaciones.filter(a=>a.zona==='A'&&a.rolOrigen==='guia').length;
+    const nSA = asignaciones.filter(a=>a.zona==='A'&&a.rolOrigen==='subguia').length;
+    stats += `<div class="alert alert-info" style="margin-bottom:10px;">
+      Zona B: <b>${nB}</b> · Guías A: <b>${nGA}</b> · Subguías A: <b>${nSA}</b>
+    </div>`;
+  }
+  document.getElementById('resultado-stats').innerHTML = stats;
+  renderTablaResultado();
+  cerrarModal('modal-sorteo');
+  abrirModal('modal-resultado');
+}
+
+async function confirmarResultado() {
+  if (!pendingResultado) return;
+  const fecha = formatearFechaISO(pendingResultado.fecha);
+  await dbAdd('semanas', {
+    tipo: pendingResultado.tipo,
+    fecha,
+    fechaISO: pendingResultado.fecha,
+    asignaciones: pendingResultado.asignaciones,
+    excluidos: pendingResultado.excluidos,
+    cambios: pendingResultado.cambios || []
+  });
+  pendingResultado = null;
+  sorteoFechaActual = null;
+  cerrarModal('modal-resultado');
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', i===2));
+  document.querySelectorAll('.tab-panel').forEach((p,i) => p.classList.toggle('active', i===2));
+  renderEnviados();
+}
+
+function escH(s) { return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+
+// ===================== ACTUALIZAR =====================
+async function refrescarApp(){
+  const btn=document.getElementById('btn-refresh');
+  btn.innerHTML='<span class="spin">🔄</span> Actualizando...';
+  btn.disabled=true;
+  await new Promise(r=>setTimeout(r,500));
+  const activa=document.querySelector('.tab-btn.active');
+  const name=activa?.getAttribute('onclick')?.match(/'(\w+)'/)?.[1]||'oficiales';
+  if(name==='oficiales') await renderOficiales();
+  else if(name==='locales') await renderLocales();
+  else if(name==='hermanos') await renderHermanos();
+  else if(name==='sorteoenviados') await renderSorteoEnviados();
+  else await renderEnviados();
+  btn.innerHTML='🔄 Actualizar';
+  btn.disabled=false;
+}
+
+// ===================== OBLIGATORIOS =====================
+let obligatorios=[];
+async function poblarSelOblig(tipo){
+  const cands=await obtenerCandidatos(tipo);
+  const localesB=await dbGetAll('locales').then(l=>l.filter(x=>x.zona==='B'));
+  document.getElementById('oblig-nombre-sel').innerHTML='<option value="">-- nombre --</option>'+cands.map(c=>`<option value="${escH(c)}">${c}</option>`).join('');
+  document.getElementById('oblig-local-sel').innerHTML='<option value="">-- local destino --</option>'+localesB.map(l=>`<option value="${escH(l.nombre)}">${l.nombre}</option>`).join('');
+}
+function agregarObligatorio(){
+  const nombre=document.getElementById('oblig-nombre-sel').value;
+  const local=document.getElementById('oblig-local-sel').value;
+  if(!nombre||!local){alert('Selecciona nombre y local destino');return;}
+  if(obligatorios.find(o=>o.nombre===nombre)){alert('Ya está en obligatorios');return;}
+  obligatorios.push({nombre,local}); renderObligatorios();
+}
+function quitarObligatorio(i){ obligatorios.splice(i,1); renderObligatorios(); }
+function renderObligatorios(){
+  document.getElementById('obligatorios-wrap').innerHTML=obligatorios.map((o,i)=>
+    `<span class="obligatorio-tag">⭐ ${o.nombre} → ${o.local}<button onclick="quitarObligatorio(${i})">×</button></span>`).join('');
+}
+
+// ===================== CAMBIO POR EXCUSA =====================
+let cambioIdx=null;
+async function abrirCambio(idx){
+  cambioIdx=idx;
+  const a=pendingResultado.asignaciones[idx];
+  document.getElementById('cambio-contexto').value='resultado';
+  document.getElementById('cambio-semana-id').value='';
+  document.getElementById('cambio-idx').value='';
+  document.getElementById('cambio-info').innerHTML=`<b>${a.nombre}</b> presenta excusa.<br>Asignado a: <b>${a.local}</b>. Selecciona reemplazo:`;
+  const yaEnLista=new Set(pendingResultado.asignaciones.map(x=>x.nombre));
+  let cands=[];
+  if(pendingResultado.tipo==='oficiales'){
+    const ofs=await dbGetAll('oficiales');
+    cands=ofs.filter(o=>!yaEnLista.has(o.nombre) || o.nombre===a.nombre).map(o=>o.nombre);
+  } else {
+    const locs=await dbGetAll('locales');
+    locs.forEach(l=>{
+      if(l.guia && (!yaEnLista.has(l.guia) || l.guia===a.nombre)) cands.push(l.guia+` [Guía-${l.zona}]`);
+      if(l.subguia && (!yaEnLista.has(l.subguia) || l.subguia===a.nombre)) cands.push(l.subguia+` [Subguía-${l.zona}]`);
+    });
+  }
+  cands=[...new Set(cands)].sort(ordenarStrings);
+  document.getElementById('cambio-cand-sel').innerHTML='<option value="">-- seleccionar reemplazo --</option>'+cands.map(c=>`<option value="${escH(c)}">${c}</option>`).join('');
+  cerrarModal('modal-resultado');
+  abrirModal('modal-cambio');
+}
+
+async function abrirCambioSemana(semanaId, idx){
+  const semanas=await dbGetAll('semanas');
+  const semana=semanas.find(s=>s.id===semanaId);
+  const a=semana?.asignaciones?.[idx];
+  if(!semana || !a) return;
+  cambioIdx=idx;
+  document.getElementById('cambio-contexto').value='semana';
+  document.getElementById('cambio-semana-id').value=semanaId;
+  document.getElementById('cambio-idx').value=idx;
+  document.getElementById('cambio-info').innerHTML=`<b>${a.nombre}</b> presenta excusa.<br>Asignado a: <b>${a.local}</b>. Selecciona reemplazo:`;
+  const yaEnLista=new Set(semana.asignaciones.map(x=>x.nombre));
+  let cands=[];
+  if(semana.tipo==='oficiales'){
+    const ofs=await dbGetAll('oficiales');
+    cands=ofs.filter(o=>!yaEnLista.has(o.nombre) || o.nombre===a.nombre).map(o=>o.nombre);
+  } else {
+    const locs=await dbGetAll('locales');
+    locs.forEach(l=>{
+      if(l.guia && (!yaEnLista.has(l.guia) || l.guia===a.nombre)) cands.push(l.guia+` [Guía-${l.zona}]`);
+      if(l.subguia && (!yaEnLista.has(l.subguia) || l.subguia===a.nombre)) cands.push(l.subguia+` [Subguía-${l.zona}]`);
+    });
+  }
+  cands=[...new Set(cands)].sort(ordenarStrings);
+  document.getElementById('cambio-cand-sel').innerHTML='<option value="">-- seleccionar reemplazo --</option>'+cands.map(c=>`<option value="${escH(c)}">${c}</option>`).join('');
+  abrirModal('modal-cambio');
+}
+
+async function confirmarCambio(){
+  const nuevo=document.getElementById('cambio-cand-sel').value;
+  if(!nuevo){alert('Selecciona un reemplazo');return;}
+  const contexto=document.getElementById('cambio-contexto').value;
+  if(contexto==='semana'){
+    const semanaId=parseInt(document.getElementById('cambio-semana-id').value,10);
+    const indice=parseInt(document.getElementById('cambio-idx').value,10);
+    const semanas=await dbGetAll('semanas');
+    const semana=semanas.find(s=>s.id===semanaId);
+    if(!semana){cerrarModal('modal-cambio');return;}
+    const anterior=semana.asignaciones[indice]?.nombre;
+    const nombreLimpio=nuevo.replace(/\s*\[.*?\]/,'');
+    const rolMatch=nuevo.match(/\[(Guía|Subguía)-([AB])\]/i);
+    const obj={...semana.asignaciones[indice],nombre:nombreLimpio};
+    if(rolMatch){obj.rolOrigen=rolMatch[1].toLowerCase().includes('sub')?'subguia':'guia';obj.zona=rolMatch[2];}
+    semana.asignaciones[indice]=obj;
+    if(!semana.cambios) semana.cambios=[];
+    semana.cambios.push({anterior,nuevo:nombreLimpio,fecha:new Date().toLocaleDateString('es-CL')});
+    await dbPut('semanas', semana);
+    cambioIdx=null;
+    cerrarModal('modal-cambio');
+    await renderEnviados();
+    return;
+  }
+  const anterior=pendingResultado.asignaciones[cambioIdx].nombre;
+  const nombreLimpio=nuevo.replace(/\s*\[.*?\]/,'');
+  const rolMatch=nuevo.match(/\[(Guía|Subguía)-([AB])\]/i);
+  const obj={...pendingResultado.asignaciones[cambioIdx],nombre:nombreLimpio};
+  if(rolMatch){obj.rolOrigen=rolMatch[1].toLowerCase().includes('sub')?'subguia':'guia';obj.zona=rolMatch[2];}
+  pendingResultado.asignaciones[cambioIdx]=obj;
+  if(!pendingResultado.cambios) pendingResultado.cambios=[];
+  pendingResultado.cambios.push({anterior,nuevo:nombreLimpio});
+  cambioIdx=null;
+  cerrarModal('modal-cambio');
+  abrirModal('modal-resultado');
+  renderTablaResultado();
+}
+
+// ===================== EDICIÓN COMPLETA POST-SORTEO =====================
+async function abrirEditarFila(semanaId, idx) {
+  const semanas = await dbGetAll('semanas');
+  const semana = semanas.find(s => s.id === semanaId);
+  const a = semana?.asignaciones?.[idx];
+  if (!semana || !a) return;
+  document.getElementById('ef-semana-id').value = semanaId;
+  document.getElementById('ef-idx').value = idx;
+  document.getElementById('ef-nombre').value = a.nombre || '';
+  document.getElementById('ef-local').value = a.local || '';
+  document.getElementById('ef-rol').value = ['guia','subguia','asesor'].includes(a.rolOrigen) ? a.rolOrigen : 'asesor';
+  document.getElementById('ef-zona').value = (a.zona === 'A' || a.zona === 'B') ? a.zona : 'B';
+  const locs = await dbGetAll('locales');
+  document.getElementById('ef-locales-list').innerHTML = locs.map(l => `<option value="${escH(l.nombre)}">`).join('');
+  abrirModal('modal-editar-fila');
+}
+
+async function guardarEdicionFila() {
+  const semanaId = parseInt(document.getElementById('ef-semana-id').value, 10);
+  const idx = parseInt(document.getElementById('ef-idx').value, 10);
+  const nombre = document.getElementById('ef-nombre').value.trim();
+  if (!nombre) { alert('Ingresa el nombre'); return; }
+  const local = document.getElementById('ef-local').value.trim();
+  const rolOrigen = document.getElementById('ef-rol').value;
+  const zona = document.getElementById('ef-zona').value;
+  const semanas = await dbGetAll('semanas');
+  const semana = semanas.find(s => s.id === semanaId);
+  if (!semana || !semana.asignaciones[idx]) { cerrarModal('modal-editar-fila'); return; }
+  semana.asignaciones[idx] = { ...semana.asignaciones[idx], nombre, local, rolOrigen, zona };
+  await dbPut('semanas', semana);
+  cerrarModal('modal-editar-fila');
+  await renderEnviados();
+}
+
+async function abrirEditarFecha(semanaId) {
+  const semanas = await dbGetAll('semanas');
+  const semana = semanas.find(s => s.id === semanaId);
+  if (!semana) return;
+  document.getElementById('efecha-semana-id').value = semanaId;
+  document.getElementById('efecha-valor').value = semana.fechaISO || '';
+  abrirModal('modal-editar-fecha');
+}
+
+async function guardarEdicionFecha() {
+  const semanaId = parseInt(document.getElementById('efecha-semana-id').value, 10);
+  const fechaISO = document.getElementById('efecha-valor').value;
+  if (!fechaISO) { alert('Selecciona una fecha'); return; }
+  if (!esDomingoISO(fechaISO)) { alert('La fecha seleccionada no es un domingo. Selecciona un domingo válido.'); return; }
+  const semanas = await dbGetAll('semanas');
+  const semana = semanas.find(s => s.id === semanaId);
+  if (!semana) { cerrarModal('modal-editar-fecha'); return; }
+  semana.fechaISO = fechaISO;
+  semana.fecha = formatearFechaISO(fechaISO);
+  await dbPut('semanas', semana);
+  cerrarModal('modal-editar-fecha');
+  await renderEnviados();
+}
+
+// ===================== EXPORTAR / PDF =====================
+async function abrirExportar(){
+  document.getElementById('export-tipo').value='ultima';
+  await generarVista();
+  document.getElementById('modal-exportar').classList.add('open');
+}
+function cerrarExportar(){ document.getElementById('modal-exportar').classList.remove('open'); }
+document.getElementById('modal-exportar').addEventListener('click',e=>{if(e.target===document.getElementById('modal-exportar'))cerrarExportar();});
+
+async function generarVista(){
+  const tipo=document.getElementById('export-tipo').value;
+  const semanas=await dbGetAll('semanas'); semanas.sort((a,b)=>b.id-a.id);
+  let filt=semanas;
+  if(tipo==='ultima') filt=semanas.slice(0,1);
+  else if(tipo==='ofic') filt=semanas.filter(s=>s.tipo==='oficiales');
+  else if(tipo==='guias') filt=semanas.filter(s=>s.tipo==='guias');
+  const prev=document.getElementById('export-preview');
+  if(!filt.length){prev.innerHTML='<div class="alert alert-warn">No hay semanas para exportar.</div>';return;}
+  prev.innerHTML=filt.map(s=>{
+    const tag=s.tipo==='oficiales'?'Oficiales':'Guías / Subguías';
+    return `<div style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #ddd;">
+      <h3 style="font-size:14px;margin-bottom:8px;font-weight:600;">📅 ${tag} – Semana del ${s.fecha}</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead><tr style="background:#f0f0f0;">
+          <th style="padding:6px 8px;border:1px solid #ccc;text-align:left;">#</th>
+          <th style="padding:6px 8px;border:1px solid #ccc;text-align:left;">Nombre</th>
+          <th style="padding:6px 8px;border:1px solid #ccc;text-align:left;">Rol / Zona</th>
+          <th style="padding:6px 8px;border:1px solid #ccc;text-align:left;">Local Asignado</th>
+        </tr></thead>
+        <tbody>${(s.asignaciones||[]).map((a,i)=>`<tr${a.obligatorio?' style="background:#fff9e6;"':''}>
+          <td style="padding:5px 8px;border:1px solid #ccc;">${i+1}</td>
+          <td style="padding:5px 8px;border:1px solid #ccc;">${a.obligatorio?'⭐ ':''}${a.nombre}</td>
+          <td style="padding:5px 8px;border:1px solid #ccc;">${a.rolOrigen||'—'} ${a.zona||''}</td>
+          <td style="padding:5px 8px;border:1px solid #ccc;">${a.local||'—'}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+      ${s.excluidos&&s.excluidos.length?`<p style="margin-top:6px;font-size:11px;color:#888;">Excluidos: ${s.excluidos.join(', ')}</p>`:''}
+      ${s.cambios&&s.cambios.length?`<p style="font-size:11px;color:#d68910;">Cambios por excusa: ${s.cambios.map(c=>c.anterior+' → '+c.nuevo).join(', ')}</p>`:''}
+    </div>`;
+  }).join('');
+}
+
+function imprimirLista(){
+  const contenido=document.getElementById('export-preview').innerHTML;
+  const win=window.open('','_blank','width=800,height=600');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Enviados – Comunidad</title>
+    <style>body{font-family:'Segoe UI',sans-serif;padding:24px;color:#111;font-size:13px;}
+    h1{font-size:18px;margin-bottom:4px;} .sub{color:#888;font-size:12px;margin-bottom:20px;}
+    table{width:100%;border-collapse:collapse;} th,td{padding:6px 8px;border:1px solid #ccc;text-align:left;}
+    th{background:#f0f0f0;font-weight:600;} tr:nth-child(even){background:#fafafa;}
+    @media print{@page{margin:15mm;size:A4;}}</style>
+    </head><body>
+    <h1>📋 Lista de Enviados – Comunidad</h1>
+    <p class="sub">Generado: ${new Date().toLocaleDateString('es-CL',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</p>
+    ${contenido}</body></html>`);
+  win.document.close();
+  setTimeout(()=>win.print(),400);
+}
+
+// ===================== HERMANOS DISPONIBLES =====================
+async function renderHermanos() {
+  const hs = await dbGetAll('hermanos');
+  const ordenados = [...hs].sort(ordenarPorNombre);
+  const total = ordenados.length;
+  const disp = ordenados.filter(h => h.disponible !== false).length;
+  const noDisp = total - disp;
+  document.getElementById('stats-hermanos').innerHTML = `
+    <div class="stat-card"><div class="val">${total}</div><div class="lbl">Total</div></div>
+    <div class="stat-card"><div class="val">${disp}</div><div class="lbl">Disponibles</div></div>
+    <div class="stat-card"><div class="val">${noDisp}</div><div class="lbl">No disponibles</div></div>
+  `;
+  document.getElementById('tbody-hermanos').innerHTML = ordenados.map((h, i) => `
+    <tr>
+      <td>${i+1}</td>
+      <td>${h.nombre}</td>
+      <td>${h.local || '—'}</td>
+      <td>${h.zona ? `<span class="badge badge-${h.zona.toLowerCase()}">Zona ${h.zona}</span>` : '—'}</td>
+      <td>${h.disponible !== false
+        ? '<span class="badge" style="background:#d4edda;color:#1e7e34;">Disponible</span>'
+        : '<span class="badge" style="background:#e2e3e5;color:#565656;">No disponible</span>'}</td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap;">
+        <button class="btn btn-sm ${h.disponible !== false ? 'btn-success' : ''}" onclick="toggleDisponibleHermano(${h.id})">${h.disponible !== false ? '✅ Habilitado' : '⛔ Deshabilitado'}</button>
+        <button class="btn btn-sm" onclick="editarHermano(${h.id})">✏️ Editar</button>
+        <button class="btn btn-sm" onclick="abrirTrasladoHermano(${h.id})">🔀 Trasladar</button>
+        <button class="btn btn-sm btn-danger" onclick="eliminarHermano(${h.id})">🗑️</button>
+      </td>
+    </tr>`).join('');
+}
+
+function abrirModalHermano() {
+  document.getElementById('herm-id').value = '';
+  document.getElementById('herm-nombre').value = '';
+  document.getElementById('herm-local').value = '';
+  document.getElementById('herm-zona').value = '';
+  document.getElementById('herm-rol').value = 'predicador';
+  document.getElementById('modal-hermano-titulo').textContent = 'Agregar Hermano';
+  abrirModal('modal-hermano');
+}
+
+async function editarHermano(id) {
+  const hs = await dbGetAll('hermanos');
+  const h = hs.find(x => x.id === id);
+  if (!h) return;
+  document.getElementById('herm-id').value = id;
+  document.getElementById('herm-nombre').value = h.nombre;
+  document.getElementById('herm-local').value = h.local || '';
+  document.getElementById('herm-zona').value = h.zona || '';
+  document.getElementById('herm-rol').value = h.rol || 'predicador';
+  document.getElementById('modal-hermano-titulo').textContent = 'Editar Hermano';
+  abrirModal('modal-hermano');
+}
+
+async function guardarHermano() {
+  const id = document.getElementById('herm-id').value;
+  const nombre = document.getElementById('herm-nombre').value.trim();
+  if (!nombre) return alert('Ingresa el nombre');
+  const obj = {
+    nombre,
+    local: document.getElementById('herm-local').value.trim(),
+    zona: document.getElementById('herm-zona').value,
+    rol: document.getElementById('herm-rol').value
+  };
+  if (id) {
+    obj.id = parseInt(id);
+    const hsPrev = await dbGetAll('hermanos');
+    const prev = hsPrev.find(x => x.id === obj.id);
+    obj.disponible = prev ? prev.disponible !== false : true;
+    await dbPut('hermanos', obj);
+  } else {
+    obj.disponible = true;
+    await dbAdd('hermanos', obj);
+  }
+  cerrarModal('modal-hermano');
+  renderHermanos();
+}
+
+function eliminarHermano(id) {
+  document.getElementById('confirmar-msg').textContent = '¿Eliminar este hermano de la lista de disponibles? Esta acción no se puede deshacer.';
+  document.getElementById('confirmar-ok-btn').onclick = async () => {
+    cerrarModal('modal-confirmar');
+    await dbDel('hermanos', parseInt(id, 10));
+    await renderHermanos();
+  };
+  abrirModal('modal-confirmar');
+}
+
+async function toggleDisponibleHermano(id) {
+  const hs = await dbGetAll('hermanos');
+  const h = hs.find(x => x.id === id);
+  if (!h) return;
+  h.disponible = h.disponible === false ? true : false;
+  await dbPut('hermanos', h);
+  renderHermanos();
+}
+
+async function abrirTrasladoHermano(id) {
+  const hs = await dbGetAll('hermanos');
+  const h = hs.find(x => x.id === id);
+  if (!h) return;
+  const locs = await dbGetAll('locales');
+  document.getElementById('th-id').value = id;
+  document.getElementById('th-info').textContent = `Trasladando a: ${h.nombre}`;
+  document.getElementById('th-local-sel').innerHTML = locs.map(l =>
+    `<option value="${l.id}">${l.nombre} (Zona ${l.zona})</option>`).join('');
+  abrirModal('modal-traslado-hermano');
+}
+
+async function confirmarTrasladoHermano() {
+  const id = parseInt(document.getElementById('th-id').value);
+  const locId = parseInt(document.getElementById('th-local-sel').value);
+  const hs = await dbGetAll('hermanos');
+  const h = hs.find(x => x.id === id);
+  const locs = await dbGetAll('locales');
+  const loc = locs.find(l => l.id === locId);
+  if (h && loc) {
+    h.local = loc.nombre;
+    h.zona = loc.zona;
+    await dbPut('hermanos', h);
+  }
+  cerrarModal('modal-traslado-hermano');
+  renderHermanos();
+}
+
+// ===================== SORTEO DE ENVIADOS =====================
+let sorteoEnviadosActual = null; // { fecha, asignaciones:[{nombre,local,estado}] }
+
+async function renderSorteoEnviados() {
+  const campoFecha = document.getElementById('se-fecha');
+  if (!campoFecha.value) campoFecha.value = proximoDomingoISO();
+  document.getElementById('se-resultado-wrap').innerHTML = '';
+  document.getElementById('se-guardar-wrap').style.display = 'none';
+  sorteoEnviadosActual = null;
+  await renderHistorialSorteoEnviados();
+}
+
+async function realizarSorteoEnviados() {
+  const fecha = document.getElementById('se-fecha').value;
+  if (!fecha) return alert('Selecciona una fecha para el sorteo.');
+  if (!esDomingoISO(fecha)) return alert('La fecha del sorteo debe ser un día domingo.');
+  const hs = await dbGetAll('hermanos');
+  const disponibles = mezclar(hs.filter(h => h.disponible !== false));
+  if (disponibles.length === 0) return alert('No hay hermanos disponibles para realizar el sorteo.');
+  const locs = (await dbGetAll('locales')).filter(l => l.zona === 'B');
+  if (locs.length === 0) return alert('No hay locales de Zona B registrados para asignar.');
+  const locsMezcladas = mezclar([...locs]);
+  const cantidad = Math.min(disponibles.length, locsMezcladas.length);
+  const asignaciones = [];
+  for (let i = 0; i < cantidad; i++) {
+    asignaciones.push({ nombre: disponibles[i].nombre, local: locsMezcladas[i].nombre, estado: 'Asignado' });
+  }
+  sorteoEnviadosActual = { fecha, asignaciones };
+  renderResultadoSorteoEnviados();
+  document.getElementById('se-guardar-wrap').style.display = 'block';
+}
+
+function renderResultadoSorteoEnviados() {
+  const wrap = document.getElementById('se-resultado-wrap');
+  if (!sorteoEnviadosActual) { wrap.innerHTML = ''; return; }
+  const { fecha, asignaciones } = sorteoEnviadosActual;
+  wrap.innerHTML = `
+    <div class="table-scroll">
+    <table>
+      <thead><tr><th>#</th><th>Nombre</th><th>Local Asignado</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <tbody>
+        ${asignaciones.map((a, i) => `
+          <tr>
+            <td>${i+1}</td>
+            <td>${a.nombre}</td>
+            <td>${a.local}</td>
+            <td>${formatearFechaISO(fecha)}</td>
+            <td><span class="badge" style="background:#fff3cd;color:#856404;">${a.estado}</span></td>
+            <td><button class="btn btn-sm" onclick="abrirCambioAsignacionEnviado('actual', null, ${i})">🔀 Cambiar</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    </div>`;
+}
+
+async function guardarSorteoEnviados() {
+  if (!sorteoEnviadosActual) return;
+  const registro = {
+    fecha: sorteoEnviadosActual.fecha,
+    asignaciones: sorteoEnviadosActual.asignaciones.map(a => ({ ...a, estado: 'Confirmado' }))
+  };
+  await dbAdd('sorteosHermanos', registro);
+  sorteoEnviadosActual = null;
+  document.getElementById('se-resultado-wrap').innerHTML = '';
+  document.getElementById('se-guardar-wrap').style.display = 'none';
+  await renderHistorialSorteoEnviados();
+}
+
+async function renderHistorialSorteoEnviados() {
+  const registros = await dbGetAll('sorteosHermanos');
+  registros.sort((a, b) => b.id - a.id);
+  const cont = document.getElementById('se-historial');
+  if (registros.length === 0) {
+    cont.innerHTML = '<p style="color:var(--muted);font-size:12px;">Aún no hay sorteos guardados.</p>';
+    return;
+  }
+  cont.innerHTML = registros.map(r => `
+    <div class="section" style="margin-bottom:12px;">
+      <div class="section-header">
+        <h2 style="font-size:13px;">📅 ${formatearFechaISO(r.fecha)}</h2>
+        <button class="btn btn-sm btn-danger" onclick="eliminarSorteoEnviados(${r.id})">🗑️ Eliminar</button>
+      </div>
+      <div class="section-body table-scroll">
+        <table>
+          <thead><tr><th>#</th><th>Nombre</th><th>Local Asignado</th><th>Fecha</th><th>Estado</th><th>Acciones</th></tr></thead>
+          <tbody>
+            ${r.asignaciones.map((a, i) => `
+              <tr>
+                <td>${i+1}</td>
+                <td>${a.nombre}</td>
+                <td>${a.local}</td>
+                <td>${formatearFechaISO(r.fecha)}</td>
+                <td><span class="badge" style="background:#d4edda;color:#1e7e34;">${a.estado}</span></td>
+                <td><button class="btn btn-sm" onclick="abrirCambioAsignacionEnviado('historial', ${r.id}, ${i})">🔀 Cambiar</button></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`).join('');
+}
+
+async function abrirCambioAsignacionEnviado(contexto, refId, idx) {
+  let asignaciones, fecha;
+  if (contexto === 'actual') {
+    if (!sorteoEnviadosActual) return;
+    asignaciones = sorteoEnviadosActual.asignaciones;
+    fecha = sorteoEnviadosActual.fecha;
+  } else {
+    const registros = await dbGetAll('sorteosHermanos');
+    const r = registros.find(x => x.id === refId);
+    if (!r) return;
+    asignaciones = r.asignaciones;
+    fecha = r.fecha;
+  }
+  const actual = asignaciones[idx];
+  const hs = await dbGetAll('hermanos');
+  const disponibles = hs.filter(h => h.disponible !== false);
+  const yaAsignados = new Set(asignaciones.map(a => a.nombre));
+  const candidatos = disponibles.filter(h => h.nombre === actual.nombre || !yaAsignados.has(h.nombre));
+  document.getElementById('cae-contexto').value = contexto;
+  document.getElementById('cae-ref-id').value = refId === null ? '' : refId;
+  document.getElementById('cae-idx').value = idx;
+  document.getElementById('cae-info').textContent = `Reemplazando a: ${actual.nombre} — Local: ${actual.local} (${formatearFechaISO(fecha)})`;
+  document.getElementById('cae-sel').innerHTML = candidatos.map(c =>
+    `<option value="${escH(c.nombre)}" ${c.nombre === actual.nombre ? 'selected' : ''}>${c.nombre}</option>`).join('');
+  abrirModal('modal-cambiar-enviado');
+}
+
+async function confirmarCambioAsignacionEnviado() {
+  const contexto = document.getElementById('cae-contexto').value;
+  const refId = document.getElementById('cae-ref-id').value;
+  const idx = parseInt(document.getElementById('cae-idx').value);
+  const nuevoNombre = document.getElementById('cae-sel').value;
+  if (!nuevoNombre) return;
+  if (contexto === 'actual') {
+    if (!sorteoEnviadosActual) return;
+    sorteoEnviadosActual.asignaciones[idx].nombre = nuevoNombre;
+    cerrarModal('modal-cambiar-enviado');
+    renderResultadoSorteoEnviados();
+  } else {
+    const id = parseInt(refId);
+    const registros = await dbGetAll('sorteosHermanos');
+    const r = registros.find(x => x.id === id);
+    if (r) {
+      r.asignaciones[idx].nombre = nuevoNombre;
+      await dbPut('sorteosHermanos', r);
+    }
+    cerrarModal('modal-cambiar-enviado');
+    await renderHistorialSorteoEnviados();
+  }
+}
+
+function eliminarSorteoEnviados(id) {
+  document.getElementById('confirmar-msg').textContent = '¿Eliminar este sorteo guardado del historial? Esta acción no se puede deshacer.';
+  document.getElementById('confirmar-ok-btn').onclick = async () => {
+    cerrarModal('modal-confirmar');
+    await dbDel('sorteosHermanos', parseInt(id, 10));
+    await renderHistorialSorteoEnviados();
+  };
+  abrirModal('modal-confirmar');
+}
+
+function resetearSorteoActual() {
+  sorteoEnviadosActual = null;
+  document.getElementById('se-resultado-wrap').innerHTML = '';
+  document.getElementById('se-guardar-wrap').style.display = 'none';
+}
+
+// ===================== RESETEAR DATOS =====================
+function resetearDatos() {
+  document.getElementById('confirmar-msg').textContent = '⚠️ Esto eliminará TODOS los datos (oficiales, locales, semanas, hermanos y sorteos) y cargará los datos iniciales. ¿Confirmar?';
+  document.getElementById('confirmar-ok-btn').onclick = async () => {
+    cerrarModal('modal-confirmar');
+    const stores = ['oficiales', 'locales', 'semanas', 'hermanos', 'sorteosHermanos'];
+    for (const s of stores) {
+      const all = await dbGetAll(s);
+      for (const item of all) await dbDel(s, item.id);
+    }
+    await sembrarDatos();
+    await renderOficiales();
+  };
+  abrirModal('modal-confirmar');
+}
+
+// ===================== INIT =====================
+abrirDB().then(async () => {
+  await sembrarDatos();
+  renderOficiales();
+});
+</script>
+</body>
+</html>
